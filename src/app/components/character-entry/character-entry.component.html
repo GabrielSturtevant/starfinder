@@ -1,0 +1,392 @@
+<!--{{character.skillList | json}}-->
+
+<div class="container" style="margin-top: 70px;">
+
+  <div class="row">
+    <div class="col-12">
+      <div>
+        <div>
+          <h3>Base Character Stats</h3>
+          <div class="row">
+            <div class="col-md-6 mb-6">
+              <label>Name</label>
+              <input [(ngModel)]="character.name"
+                     type="text"
+                     name="characterName"
+                     class="form-control">
+            </div>
+            <div class="col-md-6 mb-6">
+              <label>Level</label>
+              <ng-select [(ngModel)]="character.level"
+                         [items]="availableCharacterLevels" (change)="classLevelOptions()">
+              </ng-select>
+            </div>
+          </div>
+
+          <div class="row">
+
+            <div class="col-md-6 mb-6">
+              <div class="row" *ngFor="let x of character.characterClass; let i = index">
+                <div class="col-md-6 mb-6">
+                  <label>Class</label>
+                  <ng-select [ngModel]="x"
+                             (change)="onCharacterClassChange($event, i)"
+                             [items]="availableClasses" bindLabel="name"></ng-select>
+                </div>
+                <div class="col-md-6 mb-6">
+                  <div class="row">
+                    <label>Level</label>
+                    <div class="col-md-8 mb-8">
+                      <ng-select [ngModel]="x.classLevel"
+                                 (change)="onClassLevelChange($event, i)"
+                                 [items]="availableClassLevels">
+                      </ng-select>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                      <button type="button" class="btn btn-primary"
+                              [disabled]="availableClasses.length === 0 || !character.canAddClass"
+                              (click)="addClass()">+
+                      </button>
+                      <button type="button" class="btn btn-primary"
+                              [disabled]="character.characterClass.length === 1"
+                              (click)="removeClass(x)">-
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <div [ngClass]="{'col-md-6 mb-6': character.theme.name !== 'Themeless',
+                               'col-md-3 mb-3': character.theme.name === 'Themeless'}">
+              <label>Theme</label>
+              <ng-select [(ngModel)]="character.theme"
+                         [items]="availableThemes"
+                         bindLabel="name">
+              </ng-select>
+            </div>
+
+            <div class="col-md-3 mb-3" *ngIf="character.theme.containsWildcard">
+              <label>Theme Modifier</label>
+              <ng-select [ngModel]="character.theme.modifier.name"
+                         (change)="character.setThemelessModifier($event)"
+                         [items]="availableModifiers"
+                         bindLabel="name">
+              </ng-select>
+            </div>
+
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-6">
+              <label>Alignment</label>
+
+              <ng-select [(ngModel)]="character.alignment"
+                         [items]="alignmentList"
+                         bindLabel="name">
+              </ng-select>
+
+            </div>
+            <div class="col-md-6 mb-6">
+              <label>Home World</label>
+              <input [(ngModel)]="character.homeWorld"
+                     type="text"
+                     name="characterHomeWorld"
+                     class="form-control">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-6">
+              <label>Gender</label>
+              <input [(ngModel)]="character.gender" type="text"
+                     name="characterGender"
+                     class="form-control">
+            </div>
+            <div class="col-md-6 mb-6">
+              <div class="row">
+                <div [ngClass]="{'col-md-12 mb-12': character.race.subSpeciesOptions.length === 1,
+                               'col-md-6 mb-6': character.race.subSpeciesOptions.length > 1}">
+                  <label>Race</label>
+                  <select [(ngModel)]="chosenRace"
+                          (change)="onRaceChange($event)"
+                          class="form-select"
+                          name="characterAlignment">
+                    <option *ngFor="let x of availableRaces"
+                            [selected]="character.race.name === x.name">{{x.name}}</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6 mb-6" *ngIf="character.race.subSpeciesOptions.length > 1">
+                  <label>Sub Species</label>
+                  <ng-select [ngModel]="character.race.subSpecies"
+                             (change)="character.setSubSpecies($event)"
+                             [items]="character.race.subSpeciesOptions">
+                  </ng-select>
+                </div>
+              </div>
+
+              <div class="row" *ngIf="character.race.containsWildcard">
+                <label class="col-md-12 mb-12">
+                  Choose Ability Modifier:
+                  <ng-select *ngFor="let mod of character.race.getAbilityAdjustments()"
+                             [ngModel]="mod" bindLabel="name"
+                             (change)="character.setRacialAbilityModifier($event)"
+                             [items]="availableModifiers" [readonly]="!mod.wildcard">
+                  </ng-select>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-6">
+              <div class="row">
+                <div class="col-md-12 mb-12">
+                  <label>Speed</label>
+                  <input value="{{character.speed.land}}"
+                         type="text"
+                         name="characterSpeed"
+                         readonly
+                         class="form-control">
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-6">
+              <label>Size</label>
+              <input value="{{character.size | capitalize}}" type="text"
+                     readonly
+                     name="characterSize"
+                     class="form-control">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-6">
+              <label>Attack Bonus</label>
+              <input [ngModel]="character.baseAttackBonus"
+                     type="text"
+                     name="characterBaseAttackBonus"
+                     disabled
+                     class="form-control">
+            </div>
+            <div class="col-md-6 mb-6">
+              <label>Diety</label>
+              <input [ngModel]="character.deity" type="text"
+                     name="characterRanks"
+                     class="form-control">
+            </div>
+          </div>
+          <br/>
+
+          <div class="row">
+            <div class="col-md-6 mb-6">
+              <div class="row">
+                <div class="col-md-12 mb-12">
+                  <h3>Abilities</h3>
+                  <table class="table table-hover">
+                    <thead>
+                    <tr>
+                      <th scope="col">Ability</th>
+                      <th scope="col">Total</th>
+                      <th scope="col">Mod</th>
+                      <th scope="col">Base</th>
+                      <th scope="col">Theme</th>
+                      <th scope="col">Race</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let char of character.abilities; let i = index" scope="row">
+                      <th>{{char.nameAbbreviation | capitalize}}</th>
+                      <td>{{char.totalScore}}</td>
+                      <td>{{char.modifierValue}}</td>
+                      <td><input [ngModel]="char.baseScore"
+                                 (change)="character.setAbilityBaseScore($event, i)"
+                                 name="characterAbility-{{char.nameAbbreviation}}"
+                                 type="number"
+                                 min="0"
+                                 class="form-control col-xs-2 "></td>
+                      <td>{{char.themeModifierTotal}}</td>
+                      <td>{{char.raceModifierTotal}}</td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12 mb-12">
+                  <h3>Skills</h3>
+                  <table class="table table-hover">
+                    <thead>
+                    <tr>
+                      <th scope="col">Skill</th>
+                      <th scope="col">Total</th>
+                      <th scope="col">Class</th>
+                      <th scope="col">Ability</th>
+                      <th scope="col">Ranks</th>
+
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let skill of character.skillList; let i = index" scope="row">
+                      <th>{{skill.name}}{{skill.classSkill ? '*' : ''}} ({{skill.associatedAbility}})</th>
+                      <td>{{skill.total}}</td>
+                      <td>{{skill.classBonus}}</td>
+                      <td>{{skill.abilityModifier}}</td>
+                      <td>
+                        <input type="number" class="form-control col-xs-2 " [(ngModel)]="character.skillList[i].ranks">
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+            <div class="col-md-6 mb-6">
+              <div class="row">
+                <div class="col-md-12 mb-12">
+                  <h3>Defense</h3>
+                  <table class="table table-hover">
+                    <thead>
+                    <tr>
+                      <th scope="col">Points</th>
+                      <th scope="col">Available</th>
+                      <th scope="col">Total</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr scope="row">
+                      <th>Hit Points</th>
+                      <td>
+                        <input type="number" [(ngModel)]="character.hitPointsCurrent" [max]="character.hitPointsTotal"
+                               [min]="0">
+                      </td>
+                      <td>{{character.hitPointsTotal}}</td>
+                    </tr>
+                    <tr scope="row">
+                      <th>Stamina Points</th>
+                      <td>
+                        <input type="number" [(ngModel)]="character.staminaPointsCurrent"
+                               [max]="character.staminaPoints" [min]="0">
+                      </td>
+                      <td>{{character.staminaPoints}}</td>
+                    </tr>
+                    <tr scope="row">
+                      <th>Resolve Points</th>
+                      <td>
+                        <input type="number" [(ngModel)]="character.resolvePointsCurrent"
+                               [max]="character.resolvePoints" [min]="0">
+                      </td>
+                      <td>{{character.resolvePoints}}</td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-12 mb-12">
+                  <table class="table table-hover">
+                    <thead>
+                    <tr>
+                      <th scope="col">Armor Class</th>
+                      <th scope="col">Value</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr scope="row">
+                      <th>Energy Armor Class (EAC)</th>
+                      <td>TBD</td>
+                    </tr>
+                    <tr scope="row">
+                      <th>Kinetic Armor Class (KAC)</th>
+                      <td>TBD</td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-12 mb-12">
+                  <table class="table table-hover">
+                    <thead>
+                    <tr>
+                      <th scope="col">Saves</th>
+                      <th scope="col">Value</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr scope="row">
+                      <th>Fortitude Save</th>
+                      <td>{{character.fortitudeSaveBonus}}</td>
+                    </tr>
+                    <tr scope="row">
+                      <th>Will Save</th>
+                      <td>{{character.willSaveBonus}}</td>
+                    </tr>
+                    <tr scope="row">
+                      <th>Reflex Save</th>
+                      <td>{{character.reflexSaveBonus}}</td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-12 mb-12">
+                  <h3>Offense TBD</h3>
+                  <table class="table table-hover">
+                    <thead>
+                    <tr>
+                      <th scope="col">Melee</th>
+                      <th scope="col">Available</th>
+                      <th scope="col">Total</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr scope="row">
+                      <th>Hit Points</th>
+                      <td>
+                        <input type="number" [(ngModel)]="character.hitPointsCurrent" [max]="character.hitPointsTotal"
+                               [min]="0">
+                      </td>
+                      <td>{{character.hitPointsTotal}}</td>
+                    </tr>
+                    <tr scope="row">
+                      <th>Stamina Points</th>
+                      <td>
+                        <input type="number" [(ngModel)]="character.staminaPointsCurrent"
+                               [max]="character.staminaPoints" [min]="0">
+                      </td>
+                      <td>{{character.staminaPoints}}</td>
+                    </tr>
+                    <tr scope="row">
+                      <th>Resolve Points</th>
+                      <td>
+                        <input type="number" [(ngModel)]="character.resolvePointsCurrent"
+                               [max]="character.resolvePoints" [min]="0">
+                      </td>
+                      <td>{{character.resolvePoints}}</td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+
+          </div>
+
+        </div>
+        <br/>
+        <!--        <button class="btn btn-primary" (click)="changeSomeShit()">Save Character</button>-->
+      </div>
+    </div>
+  </div>
+</div>

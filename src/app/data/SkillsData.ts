@@ -1,0 +1,22 @@
+export enum SkillsEnum {
+  ACROBATISCS = 'Acrobatics',
+  ATHLETICS = 'Athletics',
+  BLUFF = 'Bluff',
+  COMPUTERS = 'Computers',
+  CULTURE = 'Culture',
+  DIPLOMACY = 'Diplomacy',
+  DISGUISE = 'Disguise',
+  ENGINEERING = 'Engineering',
+  INTIMIDATE = 'Intimidate',
+  LIFE_SCIENCE = 'Life Science',
+  MEDICINE = 'Medicine',
+  MYSTICISM = 'Mysticism',
+  PERCEPTION = 'Perception',
+  PHYSICAL_SCIENCE = 'Physical Science',
+  PILOTING = 'Piloting',
+  PROFESSION = 'Profession',
+  SENSE_MOTIVE = 'Sense Motive',
+  SLEIGHT_OF_HAND = 'Sleight of Hand',
+  STEALTH = 'Stealth',
+  SURVIVAL = 'Survival'
+}
